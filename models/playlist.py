@@ -1,15 +1,8 @@
 # models/playlist.py
-"""
-Gerenciador de Playlist - Modelo de Dados
-Versão 1.0.0
-Data: 04/12/2023
-
-Modelo de dados para gerenciamento de playlists.
-"""
-# models/playlist.py
 from dataclasses import dataclass
 from typing import List
 import json
+from utils.config_manager import ConfigManager
 
 @dataclass
 class Track:
@@ -23,7 +16,8 @@ class PlaylistModel:
     """Modelo para gerenciamento de playlists"""
 
     def __init__(self):
-        self.playlists_file = "playlists.json"
+        self.config_manager = ConfigManager()
+        self.playlists_file = self.config_manager.get_playlist_path()
 
     def save_playlist(self, name: str, tracks: List[Track]) -> None:
         """
@@ -35,7 +29,7 @@ class PlaylistModel:
         """
         try:
             try:
-                with open(self.playlists_file, 'r') as f:
+                with open(self.playlists_file, 'r', encoding='utf-8') as f:
                     playlists = json.load(f)
             except FileNotFoundError:
                 playlists = {}
@@ -50,7 +44,7 @@ class PlaylistModel:
                 } for t in tracks
             ]
 
-            with open(self.playlists_file, 'w') as f:
+            with open(self.playlists_file, 'w', encoding='utf-8') as f:
                 json.dump(playlists, f, indent=4)
 
         except Exception as e:
@@ -67,7 +61,7 @@ class PlaylistModel:
             List[Track]: Lista de faixas
         """
         try:
-            with open(self.playlists_file, 'r') as f:
+            with open(self.playlists_file, 'r', encoding='utf-8') as f:
                 playlists = json.load(f)
 
             if name not in playlists:
@@ -93,7 +87,7 @@ class PlaylistModel:
             List[str]: Lista de nomes
         """
         try:
-            with open(self.playlists_file, 'r') as f:
+            with open(self.playlists_file, 'r', encoding='utf-8') as f:
                 playlists = json.load(f)
             return list(playlists.keys())
         except FileNotFoundError:

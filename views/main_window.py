@@ -1,3 +1,4 @@
+
 """
 Gerenciador de Playlist - Interface Gráfica
 Versão 1.0.0
@@ -5,6 +6,8 @@ Data: 04/12/2023
 
 Interface gráfica principal do sistema.
 """
+from utils.config_manager import ConfigManager
+from models.playlist import PlaylistModel
 from PyQt6.QtWidgets import (QMainWindow, QWidget, QVBoxLayout, QHBoxLayout,
                              QPushButton, QLineEdit, QSlider, QLabel, QFileDialog,
                              QInputDialog, QComboBox, QMessageBox, QMenuBar, QMenu,
@@ -456,3 +459,69 @@ class MainWindow(QMainWindow):
         if self.current_playing_button:
             self.controller.stop_audio()
         event.accept()
+
+# E ajuste a função show_config_dialog na classe MainWindow:
+    def show_config_dialog(self):
+        """Exibe diálogo de configurações"""
+        try:
+            config_manager = ConfigManager()
+            current_dir = config_manager.config.get("playlist_directory")
+
+            new_dir = QFileDialog.getExistingDirectory(
+                self,
+                "Selecionar Diretório para Playlists",
+                current_dir
+            )
+
+            if new_dir:
+                config = config_manager.config
+                config["playlist_directory"] = new_dir
+                config_manager.save_config(config)
+
+                # Recarrega o modelo com o novo caminho
+                self.controller.playlist_model = PlaylistModel()
+                self.update_playlist_list()
+
+                QMessageBox.information(
+                    self,
+                    "Sucesso",
+                    "Diretório de playlists atualizado com sucesso!"
+                )
+        except Exception as e:
+            QMessageBox.critical(
+                self,
+                "Erro",
+                f"Erro ao configurar diretório: {str(e)}"
+            )
+
+    # Também adicione a opção de configuração no setup_menu:
+    def setup_menu(self):
+        """Configura a barra de menu"""
+        menubar = self.menuBar()
+
+        # Menu Arquivo
+        file_menu = menubar.addMenu('Arquivo')
+
+        # Ação Configurações
+        config_action = file_menu.addAction('Configurações')
+        config_action.triggered.connect(self.show_config_dialog)
+
+        # Ação Carregar Playlist
+        load_action = file_menu.addAction('Carregar Playlist')
+        load_action.triggered.connect(self.update_playlist_list)
+
+        # Ação Salvar Playlist
+        save_action = file_menu.addAction('Salvar Playlist')
+        save_action.triggered.connect(self.save_playlist)
+
+        # Separador
+        file_menu.addSeparator()
+
+        # Ação Sair
+        exit_action = file_menu.addAction('Sair')
+        exit_action.triggered.connect(self.close)
+
+        # Menu Ajuda
+        help_menu = menubar.addMenu('Ajuda')
+        about_action = help_menu.addAction('Sobre')
+        about_action.triggered.connect(self.show_about)
