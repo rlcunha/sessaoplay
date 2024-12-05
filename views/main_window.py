@@ -444,12 +444,14 @@ class MainWindow(QMainWindow):
                 "Erro",
                 f"Erro ao carregar playlist: {str(e)}"
             )
-
     def update_playlist_list(self):
         """Atualiza lista de playlists"""
         current = self.playlist_combo.currentText()
         self.playlist_combo.clear()
-        names = self.controller.get_playlist_names()
+
+        # Obtém os nomes das playlists e ordena
+        names = sorted(self.controller.get_playlist_names())
+
         self.playlist_combo.addItems(names)
         if current in names:
             self.playlist_combo.setCurrentText(current)
